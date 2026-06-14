@@ -7,6 +7,8 @@ import helmet from 'helmet';
 import { rateLimit } from 'express-rate-limit';
 import logger from './utils/logger';        // ← Your Winston logger (keep this)
 
+
+
 import i18n from 'i18n';
 import cors from 'cors';
 import fs from 'node:fs';
@@ -37,17 +39,17 @@ import type { Request, Response, NextFunction } from 'express';
 
 import { validateAndSanitizeUserInput, hashPassword } from './utils/security';
 import { verifyToken } from './utils/security';
+import { secureLogin } from './routes/secureLogin';
 
 dotenv.config();
 
 const app = express();
+
 const server = new http.Server(app);
 
 const PORT = process.env.PORT || config.get('server.port') || 3000;
 
-// ======================
 // WEEK 3: SECURITY & WINSTON LOGGING
-// ======================
 
 app.use(helmet());
 
@@ -168,7 +170,6 @@ import { serveCodeSnippet, checkVulnLines } from './routes/vulnCodeSnippet'
 import { orderHistory, allOrders, toggleDeliveryStatus } from './routes/orderHistory'
 import { continueCode, continueCodeFindIt, continueCodeFixIt } from './routes/continueCode'
 import { ensureFileIsPassed, handleZipFileUpload, checkUploadSize, checkFileType, handleXmlUpload, handleYamlUpload } from './routes/fileUpload'
-import { secureLogin } from 'routes/secureLogin'
 
 
 

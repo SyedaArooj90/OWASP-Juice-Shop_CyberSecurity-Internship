@@ -1,32 +1,54 @@
-import { Request, Response } from 'express';
-import { comparePassword, generateToken, validateAndSanitizeUserInput } from '../utils/security';
+import { Request } from 'express';
+import {
+    comparePassword,
+    generateToken,
+    validateAndSanitizeUserInput,
+    checkBruteForce,
+    recordFailedAttempt,
+    resetBruteForce
+} from '../utils/security';
 import { UserModel } from '../models/user';
 
 export const secureLogin = () => {
-    return async (req: Request, res: Response) => {
+    return async (req: Request<Record<string, any>, any, { email: string; password: string }>, res: any) => {
+        console.log('🔥 secureLogin HIT');
         try {
-            const { email, password } = req.body;
+            const { email, password } = (req as any).body as { email: string; password: string };
+            const ip = (req as any).ip || (req as any).socket?.remoteAddress || 'unknown';
+            console.log('🔥 IP:', ip);
 
-            // ✅ Fixed validation check
+            // Block if this IP has too many recent failed attempts
+            if (checkBruteForce(ip)) {
+                return (res as any).status(429).json({ message: 'Too many login attempts. Please try again later.' });
+            }
+
+            // Validate input
             const validation = validateAndSanitizeUserInput({ email, password });
             if (validation.errors.length > 0) {
-                return res.status(400).json({ 
+                return (res as any).status(400).json({
                     message: 'Invalid input',
-                    errors: validation.errors 
+                    errors: validation.errors
                 });
             }
 
+            // Find user
             const user = await UserModel.findOne({ where: { email } });
             if (!user) {
-                return res.status(401).json({ message: 'Invalid credentials' });
+                recordFailedAttempt(ip);
+                return (res as any).status(401).json({ message: 'Invalid credentials' });
             }
 
+            // Check password
             const isValid = await comparePassword(password, user.password);
             if (!isValid) {
-                return res.status(401).json({ message: 'Invalid credentials' });
+                recordFailedAttempt(ip);
+                return (res as any).status(401).json({ message: 'Invalid credentials' });
             }
 
-            const token = generateToken(user.id);
+            // Success — clear failed attempt history for this IP
+            resetBruteForce(ip);
+
+            const token = generateToken(user.id.toString());
 
             // Return in Juice Shop expected format
             res.json({
@@ -38,7 +60,7 @@ export const secureLogin = () => {
             });
         } catch (error) {
             console.error(error);
-            res.status(500).json({ message: 'Login failed' });
+            (res as any).status(500).json({ message: 'Login failed' });
         }
     };
 };
