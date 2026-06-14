@@ -62,8 +62,8 @@ const validatePreconditions = async ({ exitOnFailure = true } = {}) => {
     checkIfRequiredFileExists('frontend/dist/frontend/styles.css'),
     checkIfRequiredFileExists('frontend/dist/frontend/main.js'),
     checkIfRequiredFileExists('frontend/dist/frontend/polyfills.js'),
-    checkIfRequiredFilePatternExists('frontend/dist/frontend', /^hacking-instructor-.+\.js$/),
-    checkIfPortIsAvailable(process.env.PORT ?? config.get<number>('server.port'))
+    checkIfRequiredFilePatternExists('frontend/dist/frontend', /^hacking-instructor-.+\.js$/)
+    
   ])
   const asyncConditions = asyncResults.every(condition => condition)
 

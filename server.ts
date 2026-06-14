@@ -5,7 +5,7 @@
 import dotenv from 'dotenv';
 import helmet from 'helmet';
 import { rateLimit } from 'express-rate-limit';
-import logger from './utils/logger';        // ← Your Winston logger (keep this)
+import logger from './utils/logger';        //  Winston logger 
 
 
 
@@ -49,15 +49,33 @@ const server = new http.Server(app);
 
 const PORT = process.env.PORT || config.get('server.port') || 3000;
 
-// WEEK 3: SECURITY & WINSTON LOGGING
-
-app.use(helmet());
-
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
-  message: 'Too many requests from this IP, please try again later.'
+  standardHeaders: true,
+  legacyHeaders: false
 });
+
+// WEEK 4: HSTS + CSP
+
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", 'data:'],
+      objectSrc: ["'none'"],
+      upgradeInsecureRequests: []
+    }
+  },
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true
+  }
+}));
+
 app.use(limiter);
 
 // Global Error Handler
@@ -72,9 +90,9 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 });
 
 // Start Server
-server.listen(PORT, () => {
-  logger.info(`🚀 Server started successfully on port ${PORT}`);
-});
+// server.listen(PORT, () => {
+//  logger.info(`🚀 Server started successfully on port ${PORT}`);
+//});
 
 import { sequelize, createSequelize, initModels, setSequelize } from './models'
 import { UserModel } from './models/user'
@@ -221,9 +239,19 @@ function configureApp (app: ReturnType<typeof express>, seq: typeof sequelize) {
   /* Compression for all requests */
   app.use(compression())
 
-  /* Bludgeon solution for possible CORS problems: Allow everything! */
-  app.options('*', cors())
-  app.use(cors())
+  // -------------
+  /* Week 4 add cors */
+  // -------------
+
+  const corsOptions = {
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
+  credentials: true
+};
+
+app.options('*', cors(corsOptions));
+app.use(cors(corsOptions));
 
   /* Security middleware */
   app.use(helmet.noSniff())
