@@ -1,11 +1,15 @@
 {
   "compilerOptions": {
+<<<<<<< HEAD
     "ignoreDeprecations": "6.0",
+=======
+    "ignoreDeprecations": "5.0",
+>>>>>>> 6d5f4f7efb4e0edc76e74942584788c28af9e8c6
     "baseUrl": "./",
     "outDir": "./build",
     "allowJs": true,
     "module": "commonjs",
-    "target": "es2020",
+    "target": "es2022",
     "moduleResolution": "node",
     "sourceMap": true,
     "strict": true,
@@ -14,7 +18,7 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "lib": [
-      "es2020"
+      "es2022"
     ]
   },
   "include": [
