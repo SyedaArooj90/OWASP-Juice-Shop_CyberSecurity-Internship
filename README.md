@@ -1,4 +1,4 @@
-# OWASP Juice Shop - DHC Cybersecurity Internship
+#OWASP Juice Shop — DHC Cybersecurity Internship
 **Intern:** Syeda Arooj Fatima | **ID:** DHC-1161 | **Duration:** 6 Weeks
  
 A progressively hardened implementation of the OWASP Juice Shop web application, documenting a complete offensive-to-defensive security lifecycle across 6 weeks of structured internship work.
